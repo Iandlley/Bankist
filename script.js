@@ -85,7 +85,28 @@ const displayMovements = function (movements) {
 
 displayMovements(account1.movements);
 
+const calcDisplayBalance = function(movements) {
+  const balance = movements.reduce((acc, element) => {
+    return acc + element;
+  }, 0);
+  labelBalance.textContent = `${balance}EUR`;
+}
 
+calcDisplayBalance(account1.movements);
+
+const createUserNames = function(accs) {
+
+  accs.forEach((acc) => {
+    acc.userName = acc.owner
+    .toLowerCase()
+    .split(" ")
+    .map((element) => {
+      return element.at(0);
+    }).join("");
+  });
+}
+
+createUserNames(accounts);
 
 
 
@@ -276,12 +297,36 @@ const arrary7 = array3.map((element) => {
   element * 2;
 });
 
+const movements2 = [200, 450, -400, 3000, -650, -130, 70, 1300];
+
+const eurToUsd = 1.1;
+const movementsUSD2 = movements2.map((element) => {
+  return element * eurToUsd;
+});
+
+
 // FILTER cria um novo array com os elementos que resultam em true de acordo com a condição
 
 const array4 = [0, 1, 2, 3, 4, 5, 6, 7];
-const array5 = array4.filter();
+const array5 = array4.filter(function(element) {
+  return element > 0;
+});
 
-// REDUCE gera todos os elementos de um array em um único valor de acordo com a condição passada, ex: somar todos os valores.
+
+// REDUCE gera todos os elementos de um array em um único valor de acordo com a condição passada, ex: somar todos os valores, encontrar o maior valor.
+//Tem como parametros uma callback function e o valor inicial do acumulador. A callback recebe como parametros um acumulador (que vai persistir os valores), o elemento atual, index e o array.
 
 const array8 = [0, 1, 2, 3, 4, 5, 6, 7];
 const array9 = array4.reduce(acc + current);
+
+const balance00 = array8.reduce((accumulator, currentEl) => {
+  return accumulator + currentEl;
+}, 0);
+
+const maxValue = array8.reduce((accumulator, currentEl) => {
+  if(accumulator > currentEl) {
+    return accumulator
+  } else {
+    return currentEl;
+  }
+}, array8[0]);
