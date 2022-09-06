@@ -83,21 +83,46 @@ const displayMovements = function (movements) {
   });
 } 
 
-displayMovements(account1.movements);
-
 const calcDisplayBalance = function(movements) {
   const balance = movements.reduce((acc, element) => {
     return acc + element;
   }, 0);
-  labelBalance.textContent = `${balance}EUR`;
+  labelBalance.textContent = `${balance}€`;
 }
 
-calcDisplayBalance(account1.movements);
+const calcDisplaySummary = function(acc) {
+  const incomes = acc.movements
+     .filter((mov) => {
+      return mov > 0;
+    }).reduce((accumulator, mov) => {
+      return accumulator + mov;
+    }, 0);
+  labelSumIn.textContent = `${incomes}€`;
+
+  const out = acc.movements.filter((mov) => {
+      return mov < 0;
+  }).reduce((accumulator, mov) => {
+      return accumulator + mov;
+  }, 0);
+  labelSumOut.textContent = `${Math.abs(out)}€`;
+
+  const interest = acc.movements
+    .filter((mov) => {
+      return mov > 0;
+  }).map((deposit) => {
+      return deposit * acc.interestRate / 100; 
+  }).filter((element) => {
+      return element >= 1;
+  }).reduce((accumulator, element) => {
+      return accumulator + element;
+  }, 0);
+  labelSumInterest.textContent = `${interest}€`;
+}
 
 const createUserNames = function(accs) {
 
   accs.forEach((acc) => {
-    acc.userName = acc.owner
+    acc.username = acc.owner
     .toLowerCase()
     .split(" ")
     .map((element) => {
@@ -105,9 +130,39 @@ const createUserNames = function(accs) {
     }).join("");
   });
 }
-
 createUserNames(accounts);
 
+// Event handlers
+
+let currentAccount;
+
+btnLogin.addEventListener("click", function(event) {
+  event.preventDefault();
+
+  currentAccount = accounts.find((element) => {
+    return element.username === inputLoginUsername.value;
+  });
+
+  if (currentAccount?.pin === Number(inputLoginPin.value)) {
+    
+    labelWelcome.textContent = `Welcome back ${currentAccount.owner.split(" ")[0]}`;
+    containerApp.style.opacity = 100;
+
+    // Clear input fields
+    inputLoginUsername.value = "";
+    inputLoginPin.value = "";
+    inputLoginPin.blur();
+
+
+    // Display data
+    displayMovements(currentAccount.movements);
+    calcDisplayBalance(currentAccount.movements);
+    calcDisplaySummary(currentAccount);
+
+  }
+
+  
+});
 
 
 
@@ -317,7 +372,9 @@ const array5 = array4.filter(function(element) {
 //Tem como parametros uma callback function e o valor inicial do acumulador. A callback recebe como parametros um acumulador (que vai persistir os valores), o elemento atual, index e o array.
 
 const array8 = [0, 1, 2, 3, 4, 5, 6, 7];
-const array9 = array4.reduce(acc + current);
+const array9 = array4.reduce((acc, current) => {
+  return acc + current;
+});
 
 const balance00 = array8.reduce((accumulator, currentEl) => {
   return accumulator + currentEl;
@@ -330,3 +387,17 @@ const maxValue = array8.reduce((accumulator, currentEl) => {
     return currentEl;
   }
 }, array8[0]);
+
+// FIND retorna o primeiro elemento que satisfaça a condição
+
+const array10 = [-1, 0, 1, 2, 3, 4, 5, 6, 7];
+const found = array10.find((element) => {
+  return element < 0;
+});
+ 
+console.log(found);
+
+const account = accounts.find((element) => {
+  return element.owner === 'Jessica Davis';
+});
+console.log(account);
