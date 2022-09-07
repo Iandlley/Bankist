@@ -180,11 +180,26 @@ btnTransfer.addEventListener("click", function(event) {
     currentAccount.movements.push(-amount);
     receiverAcc.movements.push(amount);
     
-    //DIsplay Data
+    //Display Data
     updateUI(currentAccount);
   } 
 });
 
+btnLoan.addEventListener("click", function(event) {
+  event.preventDefault();
+
+  const amount = Number(inputLoanAmount.value);
+
+  if (amount > 0 && currentAccount.movements.some((element) => {
+    return element >= amount / 10;
+  })) {
+    currentAccount.movements.push(amount);
+
+    //Display data
+    updateUI(currentAccount);
+  }
+  inputLoanAmount.value = "";
+});
 
 btnClose.addEventListener("click", function(event) {
   event.preventDefault();
@@ -352,7 +367,7 @@ const maxValue = array8.reduce((accumulator, currentEl) => {
 
 // FIND retorna o primeiro elemento que satisfaça a condição
 
-const array10 = [-1, 0, 1, 2, 3, 4, 5, 6, 7];
+let array10 = [-1, 0, 1, 2, 3, 4, 5, 6, 7];
 const found = array10.find((element) => {
   return element < 0;
 });
@@ -375,3 +390,20 @@ array10.some((element) => {
 array10.some((element) => {
   return element > 1000;
 }); //true
+
+
+// EVERY só retorna true se todos os elementos satisfazerem a condição
+array10 = [1, 2, 3, 4, 5, 6, 7];
+
+array10.every((element)=> {
+  return element > 1;
+}); //false
+
+array10.every((element)=> {
+  return element > 0;
+}); //true
+
+//FLAT remove aninhamentos em arrays, 1 por vez. Recebe como argumento depth, para escolhermos quandos níveis de aninhamento vamos remover;
+
+array10 = [[1, 2, 3], [4, 5, 6], 7, 8];
+console.log(arr.flat(1));
