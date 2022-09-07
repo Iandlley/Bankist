@@ -2,14 +2,14 @@
 
 Para logar nas 4 contas disponíveis, use:
 
-  user: js
+  user: js <br>
   pin: 1111
 
-  user: jd
+  user: jd <br>
   pin: 2222
 
-  user: stw
+  user: stw <br>
   pin: 3333
   
-  user: ss
+  user: ss <br>
   pin: 4444
