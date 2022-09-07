@@ -83,11 +83,11 @@ const displayMovements = function (movements) {
   });
 } 
 
-const calcDisplayBalance = function(movements) {
-  const balance = movements.reduce((acc, element) => {
+const calcDisplayBalance = function(acc) {
+  acc.balance  = acc.movements.reduce((acc, element) => {
     return acc + element;
   }, 0);
-  labelBalance.textContent = `${balance}€`;
+  labelBalance.textContent = `${acc.balance}€`;
 }
 
 const calcDisplaySummary = function(acc) {
@@ -132,6 +132,12 @@ const createUserNames = function(accs) {
 }
 createUserNames(accounts);
 
+const updateUI = function(account) {
+    displayMovements(account.movements);
+    calcDisplayBalance(account);
+    calcDisplaySummary(account);
+}
+
 // Event handlers
 
 let currentAccount;
@@ -155,92 +161,48 @@ btnLogin.addEventListener("click", function(event) {
 
 
     // Display data
-    displayMovements(currentAccount.movements);
-    calcDisplayBalance(currentAccount.movements);
-    calcDisplaySummary(currentAccount);
+    updateUI(currentAccount);
 
   }
+});
 
-  
+btnTransfer.addEventListener("click", function(event) {
+  event.preventDefault();
+
+  const amount = Number(inputTransferAmount.value);
+  const receiverAcc = accounts.find((acc) => {
+    return acc.username === inputTransferTo.value
+  });
+  inputTransferAmount.value = "";
+  inputTransferTo.value = "";
+
+  if(amount > 0 && receiverAcc && currentAccount.balance >= amount && receiverAcc?.username !== currentAccount.username){
+    currentAccount.movements.push(-amount);
+    receiverAcc.movements.push(amount);
+    
+    //DIsplay Data
+    updateUI(currentAccount);
+  } 
 });
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+btnClose.addEventListener("click", function(event) {
+  event.preventDefault();
+
+  if(inputCloseUsername.value === currentAccount.username 
+  && Number(inputClosePin.value) === currentAccount.pin) {
+
+    const index = accounts.findIndex((element) => {
+      return element.username === currentAccount.username;
+    }); 
+
+    accounts.splice(index, 1);
+    containerApp.style.opacity = 0
+  }
+
+  inputCloseUsername.value = "";
+  inputClosePin.value = "";
+});
 
 
 
@@ -401,3 +363,15 @@ const account = accounts.find((element) => {
   return element.owner === 'Jessica Davis';
 });
 console.log(account);
+
+
+// SOME retorna um booleano de acordo com a condição. 
+array10 = [0, 1, 2, 3, 4, 5, 6, 7];
+
+array10.some((element) => {
+  return element === 1;
+}); //true
+
+array10.some((element) => {
+  return element > 1000;
+}); //true
