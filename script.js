@@ -4,12 +4,29 @@
 /////////////////////////////////////////////////
 // BANKIST APP
 
+/////////////////////////////////////////////////
 // Data
+
+// DIFFERENT DATA! Contains movement dates, currency and locale
+
 const account1 = {
   owner: 'Jonas Schmedtmann',
-  movements: [200, 450, -400, 3000, -650, -130, 70, 1300],
+  movements: [200, 455.23, -306.5, 25000, -642.21, -133.9, 79.97, 1300],
   interestRate: 1.2, // %
   pin: 1111,
+
+  movementsDates: [
+    '2019-11-18T21:31:17.178Z',
+    '2019-12-23T07:42:02.383Z',
+    '2020-01-28T09:15:04.904Z',
+    '2020-04-01T10:17:24.185Z',
+    '2020-05-08T14:11:59.604Z',
+    '2020-05-27T17:01:17.194Z',
+    '2020-07-11T23:36:17.929Z',
+    '2020-07-12T10:51:36.790Z',
+  ],
+  currency: 'EUR',
+  locale: 'pt-PT', // de-DE
 };
 
 const account2 = {
@@ -17,24 +34,24 @@ const account2 = {
   movements: [5000, 3400, -150, -790, -3210, -1000, 8500, -30],
   interestRate: 1.5,
   pin: 2222,
+
+  movementsDates: [
+    '2019-11-01T13:15:33.035Z',
+    '2019-11-30T09:48:16.867Z',
+    '2019-12-25T06:04:23.907Z',
+    '2020-01-25T14:18:46.235Z',
+    '2020-02-05T16:33:06.386Z',
+    '2020-04-10T14:43:26.374Z',
+    '2020-06-25T18:49:59.371Z',
+    '2020-07-26T12:01:20.894Z',
+  ],
+  currency: 'USD',
+  locale: 'en-US',
 };
 
-const account3 = {
-  owner: 'Steven Thomas Williams',
-  movements: [200, -200, 340, -300, -20, 50, 400, -460],
-  interestRate: 0.7,
-  pin: 3333,
-};
+const accounts = [account1, account2];
 
-const account4 = {
-  owner: 'Sarah Smith',
-  movements: [430, 1000, 700, 50, 90],
-  interestRate: 1,
-  pin: 4444,
-};
-
-const accounts = [account1, account2, account3, account4];
-
+/////////////////////////////////////////////////
 // Elements
 const labelWelcome = document.querySelector('.welcome');
 const labelDate = document.querySelector('.date');
@@ -61,11 +78,22 @@ const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
-const displayMovements = function (movements) {
+const displayMovements = function (acc, sort = false) {
   containerMovements.innerHTML = "";
+
+  const movs = sort ? acc.movements.slice().sort((a, b) => {
+    return a - b;
+  }) : acc.movements;
   
-  movements.forEach((mov, index) => {
-    const type = mov > 0 ? "deposit" : "withdrawal"
+  movs.forEach((mov, index) => {
+    const type = mov > 0 ? "deposit" : "withdrawal";
+
+    const date = new Date(acc.movementsDates[index]);
+    const day = `${date.getDate()}`.padStart(2, "0");
+    const month = `${date.getMonth() + 1}`.padStart(2, "0");
+    const year = date.getFullYear(); 
+    const displayDate = `${day}/${month}/${year}`;
+
 
     const html = `
     <div class="movements__row">
@@ -73,7 +101,9 @@ const displayMovements = function (movements) {
       <div class="movements__type 
       movements__type--${type}">${index + 1} ${type}</div>
 
-      <div class="movements__value">${mov}€</div>
+      <div class="movements__date">${displayDate}</div>
+
+      <div class="movements__value">${mov.toFixed(2)}€</div>
 
     </div>
     `;
@@ -87,7 +117,7 @@ const calcDisplayBalance = function(acc) {
   acc.balance  = acc.movements.reduce((acc, element) => {
     return acc + element;
   }, 0);
-  labelBalance.textContent = `${acc.balance}€`;
+  labelBalance.textContent = `${acc.balance.toFixed(2)}€`;
 }
 
 const calcDisplaySummary = function(acc) {
@@ -97,14 +127,14 @@ const calcDisplaySummary = function(acc) {
     }).reduce((accumulator, mov) => {
       return accumulator + mov;
     }, 0);
-  labelSumIn.textContent = `${incomes}€`;
+  labelSumIn.textContent = `${incomes.toFixed(2)}€`;
 
   const out = acc.movements.filter((mov) => {
       return mov < 0;
   }).reduce((accumulator, mov) => {
       return accumulator + mov;
   }, 0);
-  labelSumOut.textContent = `${Math.abs(out)}€`;
+  labelSumOut.textContent = `${Math.abs(out.toFixed(2))}€`;
 
   const interest = acc.movements
     .filter((mov) => {
@@ -116,7 +146,7 @@ const calcDisplaySummary = function(acc) {
   }).reduce((accumulator, element) => {
       return accumulator + element;
   }, 0);
-  labelSumInterest.textContent = `${interest}€`;
+  labelSumInterest.textContent = `${interest.toFixed(2)}€`;
 }
 
 const createUserNames = function(accs) {
@@ -133,7 +163,7 @@ const createUserNames = function(accs) {
 createUserNames(accounts);
 
 const updateUI = function(account) {
-    displayMovements(account.movements);
+    displayMovements(account);
     calcDisplayBalance(account);
     calcDisplaySummary(account);
 }
@@ -141,6 +171,12 @@ const updateUI = function(account) {
 // Event handlers
 
 let currentAccount;
+
+//////fake account
+currentAccount = account1;
+updateUI(currentAccount);
+containerApp.style.opacity = 100;
+////////
 
 btnLogin.addEventListener("click", function(event) {
   event.preventDefault();
@@ -153,6 +189,15 @@ btnLogin.addEventListener("click", function(event) {
     
     labelWelcome.textContent = `Welcome back ${currentAccount.owner.split(" ")[0]}`;
     containerApp.style.opacity = 100;
+
+    // Create current date
+    const now = new Date();
+    const day = `${now.getDate()}`.padStart(2, "0");
+    const month = `${now.getMonth() + 1}`.padStart(2, "0");
+    const year = now.getFullYear(); 
+    const hour = `${now.getHours()}`.padStart(2, "0");
+    const min = `${now.getMinutes()}`.padStart(2, "0");
+    labelDate.textContent = `${day}/${month}/${year}, ${hour}:${min}`;
 
     // Clear input fields
     inputLoginUsername.value = "";
@@ -180,6 +225,10 @@ btnTransfer.addEventListener("click", function(event) {
     currentAccount.movements.push(-amount);
     receiverAcc.movements.push(amount);
     
+    //Display transfer date
+    currentAccount.movementsDates.push(new Date().toISOString());
+    receiverAcc.movementsDates.push(new Date().toISOString());
+
     //Display Data
     updateUI(currentAccount);
   } 
@@ -188,12 +237,15 @@ btnTransfer.addEventListener("click", function(event) {
 btnLoan.addEventListener("click", function(event) {
   event.preventDefault();
 
-  const amount = Number(inputLoanAmount.value);
+  const amount = Math.floor(inputLoanAmount.value);
 
   if (amount > 0 && currentAccount.movements.some((element) => {
     return element >= amount / 10;
   })) {
     currentAccount.movements.push(amount);
+
+    //Display loan date
+    currentAccount.movementsDates.push(new Date().toISOString());
 
     //Display data
     updateUI(currentAccount);
@@ -219,191 +271,124 @@ btnClose.addEventListener("click", function(event) {
   inputClosePin.value = "";
 });
 
+let sorted = false;
+
+btnSort.addEventListener("click", function(event) {
+  event.preventDefault();
+
+  displayMovements(currentAccount, !sorted);
+  sorted = !sorted;
+});
 
 
+// Lectures
 
+//Parse  Number.parseInt(valor, tipo de base (10 para 0 a 9 e 2 para binários))
+console.log(Number.parseInt("1.5"));// 1 
+console.log(Number.parseFloat('1.5'));//1.5
 
+// isNaN
+console.log(Number.isNaN(20)); //false
+console.log(Number.isNaN('20')); // true
 
+//ifFinite
+console.log(Number.isFinite(20)); //true
+console.log(Number.isFinite(20 / 0)); //false
+console.log(Number.isFinite("20"));// false
 
-/////////////////////////////////////////////////
-/////////////////////////////////////////////////
-// LECTURES
+//isInteger
+console.log(Number.isInteger(20));//true
+console.log(Number.isInteger(20.5));//false
 
+//sqrt
 
+console.log(Math.sqrt(25));// 5
+console.log(25 ** (1 / 2));// 5
 
-const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
+//max retorna o maior elemento
+console.log(Math.max(5, 18, 23, 11, 2)); //23
+console.log(Math.max(5, 18, '23', 11, 2)); //23
 
-/////////////////////////////////////////////////
+//min retorna o menor valor
+console.log(Math.min(5, 18, 23, 11, 2)); //5
 
-let arr0 = ["a", "b", "c", "d", "e"];
+//PI gera o valor de PI, 3.14
+console.log(Math.PI); //3.14
 
+//random
 
-//Slice
-console.log(arr0.slice(0, 2));
-console.log(arr0.slice(-1));
-console.log(arr0.slice(1, -2));
-
-
-//splice: mesma coisa que o slice, mas muda o array;
-//console.log(arr0.splice(0, 2));
-arr0.splice(-1); // apaga o ultimo elemento
-console.log(arr0);
-arr0.splice(1, 2);
-
-
-//REVERSE inverte array
-let arr1 = ["j", "i", "h", "g", "f"];
-arr1.reverse();
-console.log(arr1);
-
-
-//CONCAT
-arr0 = ["a", "b", "c", "d", "e"];
-
-let letters = arr0.concat(arr1);
-console.log(letters);
-console.log([...arr0, ...arr1]);
-
-//JOIN retorna uma string com o seprador que você escolher
-console.log(letters.join("-"));
-console.log(letters.join("0"));
-console.log(letters.join(""));
-console.log(letters.join(" "));
-
-
-
-const arr = [23, 11, 64];
-console.log(arr[0]);
-console.log(arr.at(0));
-
-// começa a contar do final
-console.log(arr.at(-1));
-console.log(arr.at(-2));
-
-console.log(arr[arr.length - 1]);
-console.log(arr.slice(-1)[0]);
-
-
-
-
-const movements1 = [200, 450, -400, 3000, -650, -130, 70, 1300];
-
-for(const movement of movements1) {
-  if(movement > 0) {
-    console.log(`Deposited ${movement}`);
-  } else {
-    console.log(`Withdrew ${Math.abs(movement)}`);
-  }
+console.log(Math.trunc(Math.random() * 6 + 1));
+const randomIn = function(min, max) {
+  return Math.trunc(Math.random() * (max - min) + 1) + min;
 }
 
-movements1.forEach(function(movement, index) {
-  if(movement > 0) {
-    console.log(`Movement ${index + 1}: Deposited ${movement}`);
-  } else {
-    console.log(`${index + 1}: Withdrew ${Math.abs(movement)}`);
-  }
-})
+//Rounding integers
 
-//map
-const currencies = new Map([
-  ['USD', 'United States dollar'],
-  ['EUR', 'Euro'],
-  ['GBP', 'Pound sterling'],
-]);
+console.log(Math.round(23.3));//23
+console.log(Math.round(23.9));//23
+console.log(Math.round(-23.3));//-24
 
-currencies.forEach(function(value, key){
-  console.log(`${key}:${value}`);
-});
+console.log(Math.trunc(23.9));//24
+console.log(Math.trunc(23.3));//23
+console.log(Math.round(-23.9));//-23
 
-//Set SÓ ACEITA VALORES UNICOS
-const currenciesUnique = new Set(["USD", "GBP", "USD", "EUR", "EUR"]);
+console.log(Math.floor(23.3));//23
+console.log(Math.floor(23.3));//23
 
-currenciesUnique.forEach(function(value, _, map) {
-  console.log(`${_}:${value}`);
-});
+console.log(Math.ceil(23.3));//24
+console.log(Math.ceil(23.9));//24
 
-// // MAP é igual forEach, porém cria um novo array com os elementos 
+//rounding decimals
+console.log((2.7).toFixed(0));// retorna string "3"
 
-const array3 = [0, 1, 2, 3, 4, 5, 6, 7];
-const arrary7 = array3.map((element) => {
-  element * 2;
-});
+// resto/remainder
 
-const movements2 = [200, 450, -400, 3000, -650, -130, 70, 1300];
+console.log(5 % 2);// 1
+console.log(8 % 3);// 2 
+console.log(6 % 2);// 0
 
-const eurToUsd = 1.1;
-const movementsUSD2 = movements2.map((element) => {
-  return element * eurToUsd;
-});
+//separator apenas visual
 
+const diameter = 287_460_000_000;
+const priceCents = 345_99;
+const trasnferFee = 15_00;
 
-// FILTER cria um novo array com os elementos que resultam em true de acordo com a condição
+//n transforma o numero em bigInt
+console.log(4394893843427398479847242134123434712983472137492137498127n);
+console.log(BigInt(43948938434273));// transforma qualquer número em bigInt
 
-const array4 = [0, 1, 2, 3, 4, 5, 6, 7];
-const array5 = array4.filter(function(element) {
-  return element > 0;
-});
+// Date and time
 
+const now1 = new Date();
+console.log(now1);
+console.log(new Date("Sep 07 2022 19:35:00"))
 
-// REDUCE gera todos os elementos de um array em um único valor de acordo com a condição passada, ex: somar todos os valores, encontrar o maior valor.
-//Tem como parametros uma callback function e o valor inicial do acumulador. A callback recebe como parametros um acumulador (que vai persistir os valores), o elemento atual, index e o array.
+console.log(new Date(account1.movementsDates[0]));
 
-const array8 = [0, 1, 2, 3, 4, 5, 6, 7];
-const array9 = array4.reduce((acc, current) => {
-  return acc + current;
-});
+console.log(new Date(2037, 10, 19));
 
-const balance00 = array8.reduce((accumulator, currentEl) => {
-  return accumulator + currentEl;
-}, 0);
+console.log(new Date(0));
 
-const maxValue = array8.reduce((accumulator, currentEl) => {
-  if(accumulator > currentEl) {
-    return accumulator
-  } else {
-    return currentEl;
-  }
-}, array8[0]);
+//  working with dates
 
-// FIND retorna o primeiro elemento que satisfaça a condição
+const future = new Date(2037, 10, 19, 15, 23);
+console.log(future.getFullYear());
+console.log(future.getMonth());
+console.log(future.getDay());
+console.log(future.getHours());
+console.log(future.getMinutes());
+console.log(future.getSeconds());
+console.log(future.toISOString());
+console.log(future.getTime());
 
-let array10 = [-1, 0, 1, 2, 3, 4, 5, 6, 7];
-const found = array10.find((element) => {
-  return element < 0;
-});
- 
-console.log(found);
+console.log(new Date(2142267780000));
 
-const account = accounts.find((element) => {
-  return element.owner === 'Jessica Davis';
-});
-console.log(account);
+console.log(Date.now());
 
-
-// SOME retorna um booleano de acordo com a condição. 
-array10 = [0, 1, 2, 3, 4, 5, 6, 7];
-
-array10.some((element) => {
-  return element === 1;
-}); //true
-
-array10.some((element) => {
-  return element > 1000;
-}); //true
-
-
-// EVERY só retorna true se todos os elementos satisfazerem a condição
-array10 = [1, 2, 3, 4, 5, 6, 7];
-
-array10.every((element)=> {
-  return element > 1;
-}); //false
-
-array10.every((element)=> {
-  return element > 0;
-}); //true
-
-//FLAT remove aninhamentos em arrays, 1 por vez. Recebe como argumento depth, para escolhermos quandos níveis de aninhamento vamos remover;
-
-array10 = [[1, 2, 3], [4, 5, 6], 7, 8];
-console.log(arr.flat(1));
+console.log(future.setFullYear(2040));
+console.log(future.setMonth(2));
+console.log(future.setDate(3));
+console.log(future.setHours(4));
+console.log(future.setMinutes(5));
+console.log(future.setSeconds(6));
+console.log(future.setTime());
