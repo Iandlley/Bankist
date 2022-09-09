@@ -142,7 +142,7 @@ const updateUI = function(account) {
     calcDisplaySummary(account);
 }
 
-// Event handlers
+/////////////////Event handlers//////////////////////// 
 
 let currentAccount;
 
@@ -163,10 +163,8 @@ btnLogin.addEventListener("click", function(event) {
     inputLoginPin.value = "";
     inputLoginPin.blur();
 
-
     // Display data
     updateUI(currentAccount);
-
   }
 });
 
@@ -231,23 +229,3 @@ btnSort.addEventListener("click", function(event) {
   displayMovements(currentAccount.movements, !sorted);
   sorted = !sorted;
 })
-
-
-
-
-
-////FILL preenche um array de acordo com o parametro passado
-
-const x = new Array(7);// [emptyArray x7]
-x.fill(1, 3); //[1, 1, 1, emptyArray x4]
-
-//ARRAY.FROM
-const y = Array.from({length: 7}, () => {
-  return 1;
-});
-
-const z = Array.from({length: 7}, (cur, i) => {
-  return i + 1;
-});
-
-const w = Array.from(document.querySelectorAll(".class"));
